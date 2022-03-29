@@ -14,50 +14,86 @@ typedef vector<VI>VVI;
 typedef vector<long long>VL;
 typedef vector <VL>VVl;
 template<class T> void print(T& a) { for(auto x:a)cout<<x<<" "; cout<<"\n";}
-template <typename T> vector<T> sort_unique(vector<T> vec) { sort(vec.begin(), vec.end()), vec.erase(unique(vec.begin(), vec.end()), vec.end()); return vec; }
 const long double PI = 3.14159265358979;
 const long double EPS=1e-9;
 
-const ll MOD=1e9+7;
-const ll MX=1e6+5;
-ll cnt[MX];
-ll bexp(ll n, ll p)
+ll const MOD=1e9+7;
+
+vector<VL> magmat {
+    {0,0,0,0,0,1},
+    {1,0,0,0,0,1},
+    {0,1,0,0,0,1},
+    {0,0,1,0,0,1},
+    {0,0,0,1,0,1},
+    {0,0,0,0,1,1}
+};
+
+vector<VL> matmul(vector<VL>& a, vector<VL>& b)
 {
-    ll res=1;
-    while(p)
+    vector<VL> res(6,VL(6));
+    
+    for(int i=0; i<6; i++)
     {
-        if(p&1)res=res*n%MOD;
-        n=n*n%MOD;
-        p>>=1;
+        for(int j=0; j<6; j++)
+        {
+            for(int k=0; k<6; k++)
+            {
+                res[i][j]+=a[i][k]*b[k][j]%MOD;
+                res[i][j]%=MOD;
+            }
+        }
     }
     return res;
 }
 
-void Engine()
+
+vector<VL>  matexp(int p)
 {
-    ll cnt1;
-    memset(cnt,0,sizeof(cnt));
+    vector<VL> res {
+        {1,0,0,0,0,0},
+        {0,1,0,0,0,0},
+        {0,0,1,0,0,0},
+        {0,0,0,1,0,0},
+        {0,0,0,0,1,0},
+        {0,0,0,0,0,1}
+    };
 
-    for(int i=1; i<15; i++)
+    while(p)
     {
-        for(int j=i-1; j>0 && j>=i-6; j--)cnt[i]=(cnt[i]+cnt[j])%MOD;
-        if(i<=6)cnt[i]+=1;
-
-        cout<<cnt[i]<<nl;
-
-        // cnt1=bexp(2,i-1);
-        // if(i>6)cnt1-=bexp(2,i-6-1);
-        // cnt1%=MOD;
-
-        // if(cnt1!=cnt[i])
-        // {
-        //     cout<<i<<" "<<cnt[i]<<" "<<cnt1<<nl;
-        //     break;
-        // }
+        if(p&1)res=matmul(res,magmat);
+        p>>=1;
+        magmat=matmul(magmat,magmat);
     }
-    // cout<<cnt[7]<<nl;
-    // int n; cin>>n;
-    // cout<<cnt[n]<<nl;
+    return res;
+}
+
+void Engine(int tc)
+{
+    int n,s=1; cin>>n;
+    VL base(6);
+    base[0]=1;
+    for(int i=1; i<6; i++)
+    {
+        base[i]=1+s;
+        s+=base[i];
+    }
+
+    if(n<7)
+    {
+        cout<<base[n-1]<<nl;
+        return;
+    }
+
+    magmat=matexp(n-6);
+
+    ll ans=0;
+
+    for(int i=0; i<6; i++)
+    {
+        ans+=base[i]*magmat[i][5];
+        ans%=MOD;
+    }
+    cout<<ans<<nl;
 }
 
 int main()
@@ -65,9 +101,9 @@ int main()
     FastIO
     int tt=1;
     //cin>>tt;
-    while(tt--)
+    for(int tc=1; tc<=tt; tc++)
     {
-        Engine();
+        Engine(tc);
     }
     return 0;
 }  
